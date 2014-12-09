@@ -1,0 +1,8 @@
+<configuration>
+    <dataSource>
+        <property name="databasename" value="testDB.db" />
+    </dataSource>
+    <mappers>
+		<mapper resource="userMapper.xml"/>
+	</mappers>
+</configuration>

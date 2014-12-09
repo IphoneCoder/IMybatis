@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.userMapper">
+    
+	<select id="getUserWithInt" parameterType="int" resultType="UserBean">
+		 select * from users where id=#{id}
+	</select>
+    
+    <select id="getUserWithString" parameterType="string" resultType="UserBean">
+        select * from users where NAME=#{name}
+	</select>
+    
+    <select id="getUserWithMap" parameterType="map" resultType="UserBean">
+        select * from users where id=#{id}
+	</select>
+    
+    <select id="getUserWithObject" parameterType="UserBean" resultType="UserBean">
+        select * from users where id=#{userId}
+	</select>
+    
+    <select id="getOneUserResultMap" parameterType="int" resultMap="User">
+        select * from users where id=#{id}
+	</select>
+    
+    <resultMap type="UserBean" id="User">
+        <result property="userId" column="id"/>
+        <result property="tempAge" column="age"/>
+        <result property="NAME" column="NAME"/>
+        
+    </resultMap>
+    
+    <select id="getListUserResultMap" parameterType="string" resultMap="User">
+        select * from users where NAME=#{NAME}
+	</select>
+    
+    
+    <select id="getClass" parameterType="int" resultMap="classMap">
+		select * from class c, teacher t,users u where c.teacher_id=t.t_id and u.id=t_id and c.c_id=#{id}
+	</select>
+	<resultMap type="Classes" id="classMap">
+		<id property="class_id" column="c_id"/>
+		<result property="name" column="c_name"/>
+		<association property="teacher"  type="Teacher">
+            <id property="tearch_id" column="t_id"/>
+            <result property="name" column="t_name"/>
+            <association property="user"  type="UserBean">
+                <id property="userId" column="id"/>
+                <result property="tempAge" column="age"/>
+                <result property="NAME" column="NAME"/>
+            </association>
+            <association property="user1"  type="UserBean">
+                <id property="userId" column="id"/>
+                <result property="tempAge" column="age"/>
+                <result property="NAME" column="NAME"/>
+            </association>
+        </association>
+        <association property="user"  type="UserBean">
+            <id property="userId" column="id"/>
+            <result property="tempAge" column="age"/>
+            <result property="NAME" column="NAME"/>
+        </association>
+
+        
+	</resultMap>
+    
+    
+    
+    
+    <select id="getClassAndMoreStudents" parameterType="int" resultMap="getClassAndMoreStudentsMap">
+		select * from class c,student s where s.class_id=c.c_id and c.c_id=#{id} or c.c_id=2
+	</select>
+	<resultMap type="Classes" id="getClassAndMoreStudentsMap">
+		<id property="class_id" column="c_id"/>
+		<result property="name" column="c_name"/>
+            <collection property="students" type="Student">
+                <id property="student_id" column="s_id"/>
+                <result property="name" column="s_name"/>
+            </collection>
+        
+	</resultMap>
+
+    
+    
+    
+</mapper>
