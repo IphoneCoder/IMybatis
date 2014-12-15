@@ -4,5 +4,6 @@
     </dataSource>
     <mappers>
 		<mapper resource="userMapper.xml"/>
+        <mapper resource="userMapper111.xml" lazyLoading='YES' namespace="com.mybatis.userMapper111"/>
 	</mappers>
 </configuration>

@@ -15,4 +15,6 @@
 @synthesize databaseQueue;
 @synthesize resultMapStatementDic;
 @synthesize databasePath;
+@synthesize lazyLoadingDic;
+@synthesize xmlConfigBuilder;
 @end

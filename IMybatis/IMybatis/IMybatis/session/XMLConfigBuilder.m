@@ -12,6 +12,7 @@
 #import "AssociationStatement.h"
 #import "CollectionStatement.h"
 #import "TBXML.h"
+#import "Configuration.h"
 @implementation XMLConfigBuilder
 {
     BOOL parsed;//是否解析过
@@ -112,17 +113,43 @@
 -(void)mappersElement:(TBXMLElement *)parent
 {
     [TBXML iterateElementsForQuery:@"mapper" fromElement:parent withBlock:^(TBXMLElement *element) {
+        NSMutableDictionary *mutDic=[NSMutableDictionary dictionaryWithCapacity:0];
         [TBXML iterateAttributesOfElement:element withBlock:^(TBXMLAttribute *attribute, NSString *attributeName, NSString *attributeValue) {
-            if ([attributeName.lowercaseString isEqualToString:@"resource"]) {
-                if (attributeValue.length>0) {
-                    [self mapperFileParse:attributeValue];
-                }
-            }
+            [mutDic setObject:attributeValue forKey:attributeName];
+//            if ([attributeName.lowercaseString isEqualToString:@"resource"]) {
+//                if (attributeValue.length>0) {
+//                    [self mapperFileParse:attributeValue];
+//                }
+//            }
         }];
+        
+        if ([mutDic objectForKey:@"resource"]!=nil) {
+            
+            if ([[mutDic objectForKey:@"lazyLoading"]boolValue]==YES&&[mutDic objectForKey:@"namespace"]!=nil) {
+                if (self.configuration.lazyLoadingDic==nil) {
+                    self.configuration.lazyLoadingDic=[NSMutableDictionary dictionaryWithCapacity:0];
+                }
+                NSString *namespace=[NSString stringWithFormat:@"%@",[mutDic objectForKey:@"namespace"]];
+                NSArray *array=[self.configuration.lazyLoadingDic objectForKey:namespace];
+                if (array==nil) {
+                   [self.configuration.lazyLoadingDic setObject:[NSArray arrayWithObject:mutDic] forKey:namespace];
+                }else
+                {
+                    NSArray *resultArray=[array arrayByAddingObjectsFromArray:[NSArray arrayWithObject:mutDic]];
+                     [self.configuration.lazyLoadingDic setObject:resultArray forKey:namespace];
+                }
+                
+            }else
+            {
+                NSString *fileName=[NSString stringWithFormat:@"%@",[mutDic objectForKey:@"resource"]];
+               [self mapperFileParse:fileName];
+            }
+        }
     }];
 }
 -(void)mapperFileParse:(NSString *)mapperFileName
 {
+
     if (mapperFileName.length<=0) {
         ThrowException(@"XMLConfigBuilder", @"mapper resource can not be null ", nil);
     }

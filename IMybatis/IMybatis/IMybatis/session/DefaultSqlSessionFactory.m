@@ -26,6 +26,7 @@
     if (self) {
         self.configuration=[[Configuration alloc]init];
         XMLConfigBuilder *xmlBuilder=[[XMLConfigBuilder alloc]initXMLConfigBuilderWithInputData:[NSData dataWithContentsOfFile:filePath] configuration:self.configuration];
+        self.configuration.xmlConfigBuilder=xmlBuilder;
         [xmlBuilder parse];
     }
     return self;

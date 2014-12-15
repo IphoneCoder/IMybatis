@@ -62,7 +62,7 @@
         return [array objectAtIndex:0];
     }else
     {
-        NSString *reason=[NSString stringWithFormat:@"Expected one result (or null) to be returned by selectOne(), but found:%d",array.count];
+        NSString *reason=[NSString stringWithFormat:@"Expected one result (or null) to be returned by selectOne(), but found:%lu",(unsigned long)array.count];
         ThrowException(@"DefaultSqlSession", reason, nil);
     }
     return nil;
@@ -97,9 +97,38 @@
 {
     MappedStatement *executeState=[self.configuration.mappedStatementDic objectForKey:statement];
     if (executeState==nil) {
-        NSString *reason=[NSString stringWithFormat:@"can not find %@",statement];
-        ThrowException(@"DefaultSqlSession", reason, nil);
+        NSMutableString *appendStr=[NSMutableString stringWithCapacity:0];
+        NSArray *array=[statement componentsSeparatedByString:@"."];
+        NSUInteger arrayCount=array.count;
+        for (int i=0;i<arrayCount-1;i++) {
+            NSString *str=[NSString stringWithFormat:@"%@",[array objectAtIndex:i]];
+            if (i!=arrayCount-2) {
+                 [appendStr appendFormat:@"%@.",str];
+            }else
+            {
+                 [appendStr appendFormat:@"%@",str];
+            }
+           
+        }
+        NSArray *lazyLoadingArray=[self.configuration.lazyLoadingDic objectForKey:appendStr];
+        if ([lazyLoadingArray isKindOfClass:[NSArray class]]) {
+            for (NSDictionary *dic in lazyLoadingArray) {
+                NSString *fileName=[NSString stringWithFormat:@"%@",[dic objectForKey:@"resource"]];
+                if (fileName.length>0) {
+                    [self.configuration.xmlConfigBuilder mapperFileParse:fileName];
+                    
+                }
+            }
+        }
+        [self.configuration.lazyLoadingDic removeObjectForKey:appendStr];
+        executeState=[self.configuration.mappedStatementDic objectForKey:statement];
+        if (executeState==nil) {
+            NSString *reason=[NSString stringWithFormat:@"can not find %@",statement];
+            ThrowException(@"DefaultSqlSession", reason, nil);
+
+        }
     }
+
     //id<Executor>executor=[[BaseExecutor alloc]initWithConfigurationAndTransaction:self.configuration isTransaction:NO];
     id<Executor>executor=[[SimpleExecutor alloc]initWithConfigurationAndTransaction:self.configuration isTransaction:NO];
     if (executeState.mapperType==MapperTypeSelect) {
